@@ -23,7 +23,7 @@ module.exports.homelist = function(req, res) {
       name: 'Beautiful Girl',
       address: '44c4 Yakisuba Way, Night City, Sprawl s.4X84',
       rating: 1,
-      facilities: ['Hot drinks', 'Hot noodles', 'Metaverse access', 'Microsofts'],
+      facilities: ['Hot drinks', 'Food', 'Cyberspace access', 'Microsofts'],
       distance: '50ft'
     }]
   });
@@ -35,7 +35,7 @@ module.exports.locationInfo = function(req, res) {
     title: 'Location info',
     pageHeader: {title: 'Starchunks'},
     sidebar: {
-      context: 'is on Loc8r because if has accessible wifi and space to sit down with your laptop and get some work done.',
+      context: 'is on Loc8r because it has accessible wifi and space to sit down with your laptop and get some work done.',
       callToAction: 'If you\'ve been and you like it - or if you don\'t - please leave a review to help other people just like you.'
     },
     location: {
@@ -67,7 +67,7 @@ module.exports.locationInfo = function(req, res) {
         author: 'Henry Case',
         rating: 1,
         timestamp: '13 January 2097',
-        reviewText: 'Consumerist refuse at its worst. Coffee tastes like bile.'
+        reviewText: 'Consumerist refuse at its worst. No cyberspace access and the coffee tastes like bile.'
       }]
     }
   });
