@@ -1,5 +1,21 @@
-/* GET 'home' page */
-module.exports.homelist = function(req, res) {
+var request = require('request');
+var apiOptions = {
+  server: 'http://localhost:3000'
+};
+if (process.env.NODE_ENV === 'production') {
+  apiOptions.server = 'https://immense-temple-1131.herokuapp.com';
+}
+
+var renderHomepage = function(req, res, responseBody) {
+  var message;
+  if (!(responseBody instanceof Array)) {
+    message = 'API lookup error';
+    responseBody = [];
+  } else {
+    if (!responseBody.length) {
+      message = 'No places found nearby';
+    }
+  }
   res.render('locations-list', {
     title: 'Loc8r - find a place to work with wifi',
     pageHeader: {
@@ -7,26 +23,50 @@ module.exports.homelist = function(req, res) {
       strapline: 'Find places to work with wifi near you!'
     },
     sidebar: "Looking for wifi and a seat? Loc8r helps you find places to work when out and about. Perhaps with coffee, cake or a pint? Let Loc8r help you find the place you're looking for.",
-    locations: [{
-      name: 'Starchunks',
-      address: '125 High Street, Raleigh, NC 27604',
-      rating: 3,
-      facilities: ['Hot drinks', 'Food', 'Premium wifi'],
-      distance: '300ft'
-      },{
-      name: 'Funkin Donuts',
-      address: '321 Main Street, Raleigh, NC 27606',
-      rating: 4,
-      facilities: ['Hot drinks', 'Food', 'Premium wifi'],
-      distance: '150ft'
-      },{
-      name: 'Beautiful Girl',
-      address: '44c4 Yakisuba Way, Night City, Sprawl s.4X84',
-      rating: 1,
-      facilities: ['Hot drinks', 'Food', 'Cyberspace access', 'Microsofts'],
-      distance: '50ft'
-    }]
+    locations: responseBody,
+    message: message
   });
+};
+
+/* GET 'home' page */
+module.exports.homelist = function(req, res) {
+  var requestOptions, path;
+  path = '/api/locations';
+  requestOptions = {
+    url: apiOptions.server + path,
+    method: 'GET',
+    json: {},
+    qs: {
+      lng: -78.62985989999999,
+      lat: 35.7958669,
+      maxDistance: 5
+    }
+  };
+  request(
+    requestOptions,
+    function(err, response, body) {
+      var i, data;
+      data = body;
+      if (response.statusCode === 200 && data.length) {
+        for (i=0; i<data.length; i++) {
+          data[i].distance = _formatDistance(data[i].distance);
+        }
+      }
+      renderHomepage(req, res, data);
+    }
+  );
+
+  var _formatDistance = function(distance) {
+    var numDistance, unit;
+    if (distance > 0.189) { // only convert to feet if distance < 1000ft
+      numDistance = parseFloat(distance).toFixed(1);
+      unit = 'mi';
+    } else {
+      numDistance = parseInt(distance * 5280, 10);
+      unit = 'ft';
+    }
+    return numDistance + ' ' + unit;
+  }
 };
 
 /* GET 'Location info' page */

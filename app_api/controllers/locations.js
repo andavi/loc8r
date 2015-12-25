@@ -13,10 +13,14 @@ var theEarth = (function() {
   var getMilesFromMeters = function(meters) {
     return parseFloat(meters / metersInMile);
   };
+  var getMetersFromMiles = function(miles) {
+    return parseFloat(miles * metersInMile);
+  };
   return {
     getDistanceFromRads: getDistanceFromRads,
     getRadsFromDistance: getRadsFromDistance,
-    getMilesFromMeters: getMilesFromMeters
+    getMilesFromMeters: getMilesFromMeters,
+    getMetersFromMiles: getMetersFromMiles
   };
 })();
 
@@ -43,16 +47,17 @@ var buildLocationsList = function(results) {
 module.exports.locationsListByDistance = function(req, res) {
   var lng = parseFloat(req.query.lng);
   var lat = parseFloat(req.query.lat);
+  var maxDistance = theEarth.getMetersFromMiles(req.query.maxDistance);
   var point = {
     type: 'Point',
     coordinates: [lng, lat]
   };
   var geoOptions = {
     spherical: true,
-    maxDistance: 100000,
+    maxDistance: maxDistance,
     num: 10
   };
-  if (!lng || !lat) {
+  if ((!lng && lng!==0) || (!lat && lat!==0)) {
     sendJsonResponse(res, 404, {
       message: 'lng and lat query paramters are required'
     });
