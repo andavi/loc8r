@@ -6,6 +6,34 @@ if (process.env.NODE_ENV === 'production') {
   apiOptions.server = 'https://immense-temple-1131.herokuapp.com';
 }
 
+var _formatDistance = function(distance) {
+  var numDistance, unit;
+  if (distance > 0.189) { // only convert to feet if distance < 1000ft
+    numDistance = parseFloat(distance).toFixed(1);
+    unit = 'mi';
+  } else {
+    numDistance = parseInt(distance * 5280, 10);
+    unit = 'ft';
+  }
+  return numDistance + ' ' + unit;
+};
+
+var _showError = function(req, res, status) {
+  var title, content;
+  if (status === 404) {
+    title = '404, page not found';
+    content = 'Uh oh. It looks like we can\'t find your page. Sorry.';
+  } else {
+    title = status + ', something\'s gone wrong';
+    content = 'Something, somewhere, has gone just a little bit wrong.';
+  }
+  res.status(status);
+  res.render('generic-text', {
+    title: title,
+    content: content
+  });
+};
+
 var renderHomepage = function(req, res, responseBody) {
   var message;
   if (!(responseBody instanceof Array)) {
@@ -55,18 +83,6 @@ module.exports.homelist = function(req, res) {
       renderHomepage(req, res, data);
     }
   );
-
-  var _formatDistance = function(distance) {
-    var numDistance, unit;
-    if (distance > 0.189) { // only convert to feet if distance < 1000ft
-      numDistance = parseFloat(distance).toFixed(1);
-      unit = 'mi';
-    } else {
-      numDistance = parseInt(distance * 5280, 10);
-      unit = 'ft';
-    }
-    return numDistance + ' ' + unit;
-  }
 };
 
 var renderDetailPage = function(req, res, locDetail) {
@@ -94,11 +110,15 @@ module.exports.locationInfo = function(req, res) {
     requestOptions,
     function(err, response, body) {
       var data = body;
-      data.coords = {
-        lng: body.coords[0],
-        lat: body.coords[1]
-      };
-      renderDetailPage(req, res, data);
+      if (response.statusCode === 200) {
+        data.coords = {
+          lng: body.coords[0],
+          lat: body.coords[1]
+        };
+        renderDetailPage(req, res, data);
+      } else {
+        _showError(req, res, response.statusCode);
+      }
     }
   );
 };
