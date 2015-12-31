@@ -1,8 +1,7 @@
 var mongoose = require('mongoose');
 var Loc = mongoose.model('Location');
 
-var theEarth = (function() {
-  var earthRadius = 6371; // km, miles is 3959
+var converter = (function() {
   var metersInMile = 1609.34;
   var getDistanceFromRads = function(rads) {
     return parseFloat(rads * earthRadius);
@@ -33,7 +32,7 @@ var buildLocationsList = function(results) {
   var locations = [];
   results.forEach(function(doc) {
     locations.push({
-      distance: theEarth.getMilesFromMeters(doc.dis),
+      distance: converter.getMilesFromMeters(doc.dis),
       name: doc.obj.name,
       address: doc.obj.address,
       rating: doc.obj.rating,
@@ -47,7 +46,7 @@ var buildLocationsList = function(results) {
 module.exports.locationsListByDistance = function(req, res) {
   var lng = parseFloat(req.query.lng);
   var lat = parseFloat(req.query.lat);
-  var maxDistance = theEarth.getMetersFromMiles(req.query.maxDistance);
+  var maxDistance = converter.getMetersFromMiles(req.query.maxDistance);
   var point = {
     type: 'Point',
     coordinates: [lng, lat]
