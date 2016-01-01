@@ -85,20 +85,7 @@ module.exports.homelist = function(req, res) {
   );
 };
 
-var renderDetailPage = function(req, res, locDetail) {
-  res.render('location-info', {
-    title: locDetail.name,
-    pageHeader: {title: locDetail.name},
-    sidebar: {
-      context: 'is on Loc8r because it has accessible wifi and space to sit down with your laptop and get some work done.',
-      callToAction: 'If you\'ve been and you like it - or if you don\'t - please leave a review to help other people just like you.'
-    },
-    location: locDetail
-  });
-};
-
-/* GET 'Location info' page */
-module.exports.locationInfo = function(req, res) {
+var getLocationInfo = function(req, res, callback) {
   var requestOptions, path;
   path = '/api/locations/' + req.params.locationid;
   requestOptions = {
@@ -115,7 +102,7 @@ module.exports.locationInfo = function(req, res) {
           lng: body.coords[0],
           lat: body.coords[1]
         };
-        renderDetailPage(req, res, data);
+        callback(req, res, data);
       } else {
         _showError(req, res, response.statusCode);
       }
@@ -123,10 +110,62 @@ module.exports.locationInfo = function(req, res) {
   );
 };
 
+var renderDetailPage = function(req, res, locDetail) {
+  res.render('location-info', {
+    title: locDetail.name,
+    pageHeader: {title: locDetail.name},
+    sidebar: {
+      context: 'is on Loc8r because it has accessible wifi and space to sit down with your laptop and get some work done.',
+      callToAction: 'If you\'ve been and you like it - or if you don\'t - please leave a review to help other people just like you.'
+    },
+    location: locDetail
+  });
+};
+
+var renderReviewForm = function(req, res, locDetail) {
+  res.render('location-review-form', {
+    title: 'Review ' + locDetail.name + ' on Loc8r',
+    pageHeader: {title: 'Review ' + locDetail.name}
+  });
+};
+
+/* GET 'Location info' page */
+module.exports.locationInfo = function(req, res) {
+  getLocationInfo(req, res, function(req, res, responseData) {
+    renderDetailPage(req, res, responseData);
+  });
+};
+
 /* GET 'Add review' page */
 module.exports.addReview = function(req, res) {
-  res.render('location-review-form', {
-    title: 'Add review',
-    pageHeader: {title: 'Review Starchunks'}
+  getLocationInfo(req, res, function(req, res, responseData) {
+    renderReviewForm(req, res, responseData);
   });
+};
+
+/* POST 'Post review */
+module.exports.doAddReview = function(req, res) {
+  var requestOptions, path, locationid, postdata;
+  locationid = req.params.locationid;
+  path = '/api/locations/' + locationid + '/reviews';
+  postdata = {
+    author: req.body.name,
+    rating: parseInt(req.body.rating, 10),
+    reviewText: req.body.review
+  };
+  requestOptions = {
+    url: apiOptions.server + path,
+    method: 'POST',
+    json: postdata
+  };
+  request(
+    requestOptions,
+    function(err, response, body) {
+      if (response.statusCode === 201) {
+        res.redirect('/location/' + locationid);
+      } else {
+        _showError(req, res, response.statusCode);
+      }
+    }
+  );
 };
