@@ -21,18 +21,6 @@ var formatDistance = function() {
   };
 };
 
-var locationListCtrl = function($scope, loc8rData) {
-  $scope.message = 'Searching for nearby places';
-  loc8rData
-    .success(function(data) {
-      $scope.message = data.length > 0 ? '' : 'No locations found';
-      $scope.data = {locations: data};
-    })
-    .error(function(e) {
-      $scope.message = 'Sorry, something\'s gone wrong';
-    });
-};
-
 var ratingStars = function() {
   return {
     scope: {
@@ -43,50 +31,57 @@ var ratingStars = function() {
 };
 
 var loc8rData = function($http) {
-  return $http.get('/api/locations?lng=-78.6296785&lat=35.7950218&maxDistance=20');
-  //return [{
-  //  name: 'Burger Queen',
-  //  address: '125 High Street, Reading, RG6 1PS',
-  //  rating: 3,
-  //  facilities: ['Hot drinks', 'Food', 'Premium wifi'],
-  //  distance: '0.296456',
-  //  _id: '5370a35f2536f6785f8dfb6a'
-  //},{
-  //  name: 'Costy',
-  //  address: '125 High Street, Reading, RG6 1PS',
-  //  rating: 5,
-  //  facilities: ['Hot drinks', 'Food', 'Alcoholic drinks'],
-  //  distance: '0.7865456',
-  //  _id: '5370a35f2536f6785f8dfb6a'
-  //},{
-  //  name: 'Cafe Hero',
-  //  address: '125 High Street, Reading, RG6 1PS',
-  //  rating: 0,
-  //  facilities: ['Hot drinks', 'Food', 'Premium wifi'],
-  //  distance: '0.94561236',
-  //  _id: '5370a35f2536f6785f8dfb6a'
-  //},{
-  //  name: 'Starcups',
-  //  address: '125 High Street, Reading, RG6 1PS',
-  //  rating: 1,
-  //  facilities: ['Hot drinks', 'Food', 'Cold drinks'],
-  //  distance: '1.06548',
-  //  _id: '5370a35f2536f6785f8dfb6a'
-  //},{
-  //  name: 'Simon\'s cafe',
-  //  address: '125 High Street, Reading, RG6 1PS',
-  //  rating: 3,
-  //  facilities: ['Hot drinks', 'Food', 'Premium wifi'],
-  //  distance: '2.3654',
-  //  _id: '5370a35f2536f6785f8dfb6a'
-  //},{
-  //  name: 'Sally\'s pub',
-  //  address: '125 High Street, Reading, RG6 1PS',
-  //  rating: 5,
-  //  facilities: ['Hot drinks', 'Food', 'Alcoholic drinks'],
-  //  distance: '4.213654',
-  //  _id: '5370a35f2536f6785f8dfb6a'
-  //}];
+  var locationByCoords = function(lat, lng) {
+    return $http.get('/api/locations?lng=' + lng + '&lat=' + lat + '&maxDistance=40000');
+  };
+  return {
+    locationByCoords: locationByCoords
+  };
+};
+
+var geolocation = function() {
+  var getPosition = function (cbSuccess, cbError, cbNoGeo) {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(cbSuccess, cbError);
+    } else {
+      cbNoGeo();
+    }
+  };
+  return {
+    getPosition: getPosition
+  };
+};
+
+var locationListCtrl = function($scope, loc8rData, geolocation) {
+  $scope.message = 'Checking your location';
+
+  $scope.getData = function(position) {
+    var lat = position.coords.latitude,
+        lng = position.coords.longitude;
+    $scope.message = 'Searching for nearby places';
+    loc8rData.locationByCoords(lat, lng)
+      .success(function(data) {
+        $scope.message = data.length > 0 ? '' : 'No locations found';
+        $scope.data = {locations: data};
+      })
+      .error(function(e) {
+        $scope.message = 'Sorry, something\'s gone wrong';
+      });
+  };
+
+  $scope.showError = function(error) {
+    $scope.$apply(function() {
+      $scope.message = error.message;
+    });
+  };
+
+  $scope.noGeo = function() {
+    $scope.$apply(function() {
+      $scope.message = 'Geolocation not supported by this browser.';
+    });
+  };
+
+  geolocation.getPosition($scope.getData, $scope.showError, $scope.noGeo);
 };
 
 angular
@@ -94,4 +89,5 @@ angular
   .controller('locationListCtrl', locationListCtrl)
   .filter('formatDistance', formatDistance)
   .directive('ratingStars', ratingStars)
-  .service('loc8rData', loc8rData);
+  .service('loc8rData', loc8rData)
+  .service('geolocation', geolocation);
