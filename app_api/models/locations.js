@@ -11,7 +11,7 @@ var openingTimeSchema = new mongoose.Schema({
   days: {type: String, required: true},
   opening: String,
   closing: String,
-  closed: {type: Boolean, require: true}
+  closed: {type: Boolean, required: true}
 });
 
 var locationSchema = new mongoose.Schema({
