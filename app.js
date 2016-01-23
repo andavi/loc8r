@@ -8,7 +8,7 @@ require('./app_api/models/db');
 var uglifyJs = require('uglify-js');
 var fs = require('fs');
 
-var routes = require('./app_server/routes/index');
+//var routes = require('./app_server/routes/index');
 var routesApi = require('./app_api/routes/index');
 var users = require('./app_server/routes/users');
 
@@ -23,7 +23,10 @@ var appClientFiles = [
   'app_client/common/services/geolocation.service.js',
   'app_client/common/services/loc8rData.service.js',
   'app_client/common/filters/formatDistance.filter.js',
-  'app_client/common/directive/ratingStars/ratingStars.directive.js'
+  'app_client/common/directives/ratingStars/ratingStars.directive.js',
+  'app_client/common/directives/footerGeneric/footerGeneric.directive.js',
+  'app_client/common/directives/navigation/navigation.directive.js',
+  'app_client/common/directives/pageHeader/pageHeader.directive.js'
 ];
 var uglified = uglifyJs.minify(appClientFiles, {compress: false});
 
