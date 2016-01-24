@@ -52,7 +52,7 @@ app.use('/api', routesApi);
 app.use('/users', users);
 
 app.use(function(req, res) {
-  res.sendfile(path.join(__dirname, 'app_client', 'index.html'));
+  res.sendFile(path.join(__dirname, 'app_client', 'index.html'));
 });
 
 // catch 404 and forward to error handler

@@ -6,6 +6,10 @@
 
   homeCtrl.$inject = ['$scope', 'loc8rData', 'geolocation'];
   function homeCtrl($scope, loc8rData, geolocation) {
+    // Nasty IE9 redirect hack (not recommended)
+    if (window.location.pathname !== '/') {
+      window.location.href = '/#' + window.location.pathname;
+    }
     var vm = this;
     vm.pageHeader = {
       title: 'Loc8r',
