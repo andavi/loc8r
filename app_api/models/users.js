@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var crypto = requite('crypto');
+var crypto = require('crypto');
 
 var userSchema = new mongoose.Schema({
   email: {
@@ -23,4 +23,4 @@ userSchema.methods.setPasswod = function (password) {
 userSchema.methods.validPasswod = function (password) {
   var hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
   return this.hash === hash;
-}
+};
