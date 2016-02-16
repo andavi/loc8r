@@ -10,7 +10,7 @@ var sendJSONresponse = function(res, status, content) {
 module.exports.register = function(req, res) {
   if (!req.body.name || !req.body.email || !req.body.password) {
     sendJSONresponse(res, 400, {
-      message: 'All fields required'
+      "message": "All fields required"
     });
     return;
   }
@@ -38,7 +38,7 @@ module.exports.register = function(req, res) {
 module.exports.login = function(req, res) {
   if (!req.body.email || !req.body.password) {
     sendJSONresponse(res, 400, {
-      message: 'All fields required'
+      "message": "All fields required"
     });
     return;
   }
