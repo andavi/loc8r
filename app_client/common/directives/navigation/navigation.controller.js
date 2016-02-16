@@ -15,8 +15,11 @@
 
     vm.logout = function() {
       authentication.logout();
-      $location.path('/');
-      $route.reload();
+      if ($location.path() === '/'){
+        $route.reload();
+      } else {
+        $location.path('/');
+      }
     };
   }
 }) ();
